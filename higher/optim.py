@@ -139,6 +139,7 @@ class DifferentiableOptimizer(_abc.ABC):
         loss: _torch.Tensor,
         params: _typing.Iterable[_torch.Tensor] = None,
         override: _typing.Optional[_OverrideType] = None,
+        gradient_preprocessing_fn: _typing.Optional[_typing.Callable] = None,
         **kwargs
     ) -> _typing.Iterable[_torch.Tensor]:
         r"""Perform a model update.
@@ -211,6 +212,12 @@ class DifferentiableOptimizer(_abc.ABC):
             create_graph=self._track_higher_grads,
             allow_unused=True  # boo
         )
+        if gradient_preprocessing_fn is not None:
+          preprocessed = gradient_preprocessing_fn(all_grads)
+          if len(preprocessed) != len(all_grads):
+            raise ValueError("gradient_preprocessing_fn must return "
+                             "the same number of tensors as it takes for input")
+          all_grads = preprocessed
 
         grouped_grads = []
         for group, mapping in zip(self.param_groups, self._group_to_param_list):
