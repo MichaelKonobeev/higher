@@ -350,8 +350,8 @@ def make_functional(
 
     def _update_params(self, params):
         self.fast_params = params
-        params = self._expand_params(params)
-        _update_patched_params(self, [params], 0)
+        params_box[0] = self._expand_params(params)
+        _update_patched_params(self, params_box, 0)
 
     setattr(MonkeyPatched, "forward", _patched_forward)
     setattr(MonkeyPatched, "parameters", _patched_parameters)
