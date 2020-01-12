@@ -23,17 +23,17 @@ def clip_norm(tensors, max_norm, norm_type=2):
     max_norm = float(max_norm)
     norm_type = float(norm_type)
     if norm_type == inf:
-        total_norm = max(t.abs().max() for t in tensors)
+        total_norm = max(t.abs().max() for t in tensors if t is not None)
     else:
         total_norm = 0
-        for t in tensors:
+        for t in filter(lambda t: t is not None, tensors):
             param_norm = t.norm(norm_type)
             total_norm += param_norm.item() ** norm_type
         total_norm = total_norm ** (1. / norm_type)
     clip_coef = max_norm / (total_norm + 1e-6)
     if clip_coef >= 1:
         return tensors
-    return [t.mul(clip_coef) for t in tensors]
+    return [t.mul(clip_coef) if t is not None else t for t in tensors]
 
 
 def make_clip_norm_fn(max_norm, norm_type=2):
